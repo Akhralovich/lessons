@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
-
 class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
@@ -29,8 +28,7 @@ class Profile(Base):
     user = relationship("User", back_populates="profile", uselist=False)
 
     def __str__(self):
-        return f"Profile #{self.phone}"
-
+        return f"Profile #{self.id}"
 
 class Address(Base):
     __tablename__ = "address"
@@ -44,17 +42,15 @@ class Address(Base):
     def __str__(self):
         return f"Address #{self.id}"
 
-
 class Purchase(Base):
     __tablename__ = "purchase"
     id = Column(Integer, primary_key=True)
-    user_id = Column(ForeignKey("user.id"))
-    product_id = Column(ForeignKey("product.id"))
+    user_id = Column(ForeignKey("user.id"), primary_key=True)
+    product_id = Column(ForeignKey("product.id"), primary_key=True)
     count = Column(Integer)
 
     user = relationship("User", back_populates="purchases", uselist=False)
     product = relationship("Product", back_populates="purchases", uselist=False)
-
 
 class Product(Base):
     __tablename__ = "product"
@@ -63,3 +59,5 @@ class Product(Base):
     price = Column(Float)
 
     purchases = relationship("Purchase", back_populates="product")
+menu
+1
