@@ -1,19 +1,9 @@
-DB_USER = "lexa"
-DB_PASSWORD = "lexa"
-DB_NAME = "lexa"
+from sqlalchemy.orm import sessionmaker
 
-if __name__ == "__main__":
-    engine = create_engine(
-        f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost/{DB_NAME}"
-    )
-    if not database_exists(engine.url):
-        create_database(engine.url)
+from lesson_13.models import Base
 
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-session = Session()
 
-user = User(email="test@test.com", password="password")
-session.add(user)
-
-session.commit()
+def create_tables(engine):
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    return Session()
