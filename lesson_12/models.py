@@ -1,44 +1,65 @@
-import logging
+from sqlalchemy import Integer, String, Column, ForeignKey, Float
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
-from sqlalchemy import create_engine
-from sqlalchemy_utils import create_database, database_exists
-
-from lesson_13.services import create_user
-from lesson_13.utils import create_tables
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-DB_USER = "manti"
-DB_PASSWORD = "manti"
-DB_NAME = "manti"
+Base = declarative_base()
 
 
-if __name__ == "__main__":
-    engine = create_engine(
-        f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost/{DB_NAME}"
-    )
-    if not database_exists(engine.url):
-        create_database(engine.url)
+class User(Base):
+    __tablename__ = "user"
+    id = Column(Integer, primary_key=True)
+    email = Column(String)
+    password = Column(String)
 
-    session = create_tables(engine)
+    profile = relationship("Profile", back_populates="user", uselist=False)
+    addresses = relationship("Address", back_populates="user")
+    purchases = relationship("Purchase", back_populates="user")
 
-    menu = """
-        1. Создать пользователя
-        2. Найти пользователя
-        3. Выйти
-        """
+    def __str__(self):
+        return f"User #{self.email}"
 
-    while True:
-        logger.info(menu)
-        print()
-        choice = input("Выберите функцию: ")
 
-        if choice == "1":
-            email = input("Введите email: ")
-            password = input("Введите пароль: ")
+class Profile(Base):
+    __tablename__ = "profile"
+    id = Column(Integer, primary_key=True)
+    phone = Column(String)
+    age = Column(Integer)
 
-            user = create_user(session, email, password)
-            logger.info(f"Пользователь #{user.id} создан")
-        elif choice == "3":
-            exit()
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship("User", back_populates="profile", uselist=False)
+
+    def __str__(self):
+        return f"Profile #{self.id}"
+
+
+class Address(Base):
+    __tablename__ = "address"
+    id = Column(Integer, primary_key=True)
+    city = Column(String)
+    address = Column(String)
+
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship("User", back_populates="addresses", uselist=False)
+
+    def __str__(self):
+        return f"Address #{self.address}"
+
+
+class Purchase(Base):
+    __tablename__ = "purchase"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(ForeignKey("user.id"))
+    product_id = Column(ForeignKey("product.id"))
+    count = Column(Integer)
+
+    user = relationship("User", back_populates="purchases", uselist=False)
+    product = relationship("Product", back_populates="purchases", uselist=False)
+
+
+class Product(Base):
+    __tablename__ = "product"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    price = Column(Float)
+
+    purchases = relationship("Purchase", back_populates="product")
